@@ -1,0 +1,30 @@
+{
+  "name": "innovatube-challenge",
+  "version": "1.0.0",
+  "description": "Reto técnico Full Stack para InnovaTube: Buscador de YouTube con gestión de favoritos y autenticación de usuarios.",
+  "main": "index.js",
+  "scripts": {
+    "setup-dev": "npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+
+
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test"
+  },
+  "keywords": [
+    "angular",
+    "nodejs",
+    "youtube-api",
+    "fullstack",
+    "codespaces"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  
+  }
+}

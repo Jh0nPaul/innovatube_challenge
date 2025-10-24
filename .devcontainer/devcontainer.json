@@ -1,0 +1,21 @@
+// Este archivo asegura que Node.js y Angular CLI se instalen automáticamente.
+{
+    "name": "InnovaTube Full-Stack (Node & Angular)",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:20-bullseye",
+    
+    // Instalación automática de Angular CLI al crear el Codespace
+    "postCreateCommand": "npm install -g @angular/cli",
+    
+    // Reenvío automático de puertos (Frontend y Backend)
+    "forwardPorts": [4200, 3000], 
+    
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "angular.ng-template",
+                "esbenp.prettier-vscode",
+                "ms-vscode.vscode-typescript-tslint-plugin"
+            ]
+        }
+    }
+}
