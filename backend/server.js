@@ -1,12 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const videoRoutes = require('./routes/videos');
+const authRoutes = require('./routes/auth');
+const favoriteRoutes = require('./routes/favorites'); // <--- Asegúrate de importar
 
 // Necesario para la comunicación Front-End/Back-End
 require('dotenv').config();
-
-const authRoutes = require('./routes/auth');
-
 
 const app = express();
 
@@ -22,17 +22,17 @@ mongoose.connect(process.env.MONGO_URI)
         process.exit(1);
     });
 
-    // Montar Rutas
-app.use('/api/auth', authRoutes); // Rutas de autenticación
-// app.use('/api/favorites', favoriteRoutes); // (Próximo paso)
-// app.use('/api/videos', videoRoutes); // (Próximo paso)
+    // Monta Rutas
+app.use('/api/auth', authRoutes); 
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/videos', videoRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
     res.send('API de InnovaTube funcionando.');
 });
 
-// Iniciar Servidor
+// Inicia Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor backend escuchando en http://localhost:${PORT}`);
