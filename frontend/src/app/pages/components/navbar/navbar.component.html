@@ -1,0 +1,38 @@
+<nav class="bg-gray-800 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      
+      <!-- Logo y Nombre de la App -->
+      <div class="flex-shrink-0">
+        <a [routerLink]="['/search']" class="text-white text-2xl font-bold tracking-wider">
+          Innovatube
+        </a>
+      </div>
+
+      <!-- Opciones de Navegación -->
+      <div class="flex items-center space-x-4">
+        <a [routerLink]="['/search']" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Búsqueda</a>
+
+        <!-- 
+          Control de flujo usando 'async' pipe. 
+          Si 'isAuthenticated$' es TRUE, muestra el botón de Logout. 
+          Si es FALSE (o NULL), muestra Login/Register.
+        -->
+        @if (isAuthenticated$ | async) {
+          <!-- VISTA: Autenticado -->
+          <button 
+            (click)="logout()"
+            class="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+          >
+            Cerrar Sesión
+          </button>
+        } @else {
+          <!-- VISTA: No Autenticado -->
+          <a [routerLink]="['/login']" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Iniciar Sesión</a>
+          <a [routerLink]="['/register']" class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">Registro</a>
+        }
+      </div>
+
+    </div>
+  </div>
+</nav>

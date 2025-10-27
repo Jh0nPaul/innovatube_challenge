@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';a
+import { AuthService } from '../../services/auth.service';
+
 
 @Component({
   selector: 'app-login',
@@ -35,11 +36,11 @@ export class LoginComponent {
 
     this.authService.login(this.user.email, this.user.password).subscribe({
       next: () => {
-        // Redirigir a la página de búsqueda tras el login exitoso
+        // Redirije a la página de búsqueda tras el login exitoso
         this.router.navigate(['/search']);
       },
       error: (err) => {
-        // Mostrar mensaje de error (por ejemplo, credenciales inválidas)
+        // Catching de errores
         this.errorMessage = err.error?.msg || 'Error de conexión. Revisa las credenciales.';
         this.isLoading = false;
       },
