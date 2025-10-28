@@ -1,67 +1,77 @@
-import { Injectable, inject } from '@angular/core'; 
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs'; 
+import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-// Definimos la misma interfaz aquí temporalmente
 interface AuthResponse {
-  token: string;
-  msg: string;
+  token?: string;
+  user?: any;
+  msg?: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  // 1. Inyección de dependencia moderna
-  private http = inject(HttpClient); 
-  
-  // ¡¡¡ESTA ES LA RUTA CORREGIDA!!!
-  // Debe incluir la URL de Codespaces + el prefijo del backend (/api/auth).
-  private apiUrl = 'https://bug-free-lamp-9p7q696jxqph7qj7-3000.app.github.dev/api/auth'; 
+  private http = inject(HttpClient);
 
-  // 2. BehaviorSubject para el estado de autenticación
-  private _isAuthenticated = new BehaviorSubject<boolean>(this.isLoggedIn()); 
-  
-  // Observable público para que el Navbar sea visible.
+  private apiUrl = 'https://bug-free-lamp-9p7q696jxqph7qj7-3000.app.github.dev/auth';
+
+  private _isAuthenticated = new BehaviorSubject<boolean>(this.isLoggedIn());
   public isAuthenticated$: Observable<boolean> = this._isAuthenticated.asObservable();
 
-  constructor() { }
+  // Guarda token + usuario 
+  private _tokenKey = 'token';
+  private _userKey = 'user';
 
-  register(email: string, password: string): Observable<AuthResponse> {
-    // La ruta de registro ahora se construye correctamente:
-    // .../api/auth + /register 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, { email, password }) 
-      .pipe(
-        tap(res => this.saveToken(res.token))
-      );
-  }
-
-  login(email: string, password: string): Observable<AuthResponse> {
-    // La ruta de login se construye correctamente:
-    // .../api/auth + /login
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
-      .pipe(
-        tap(res => this.saveToken(res.token))
-      );
-  }
-
-  // ... (El resto del código del servicio es igual)
-  private saveToken(token: string): void {
-    localStorage.setItem('token', token);
-    this._isAuthenticated.next(true); 
+  private storeSession(token?: string, user?: any) {
+    if (token) localStorage.setItem(this._tokenKey, token);
+    if (user) localStorage.setItem(this._userKey, JSON.stringify(user));
+    if (token) this._isAuthenticated.next(true);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem(this._tokenKey);
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getToken();
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    localStorage.removeItem(this._tokenKey);
+    localStorage.removeItem(this._userKey);
     this._isAuthenticated.next(false);
   }
+
   
-  isLoggedIn(): boolean {
-    return !!this.getToken(); 
+  register(data: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    password: string;
+    // confirmPassword no se manda al backend
+    confirmPassword?: string;
+    recaptcha?: string;
+  }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
+      tap(res => this.storeSession(res.token, res.user))
+    );
   }
+
+  
+  login(emailOrUsername: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { emailOrUsername, password }).pipe(
+      tap(res => this.storeSession(res.token, res.user))
+    );
+  }
+
+  requestPassword(emailOrUsername: string) {
+  return this.http.post<{ msg: string; devResetLink?: string }>(`${this.apiUrl}/forgot-password`, { emailOrUsername });
+}
+
+resetPassword(token: string, newPassword: string) {
+  return this.http.post<{ msg: string }>(`${this.apiUrl}/reset-password`, { token, newPassword });
+}
+
+
 }
