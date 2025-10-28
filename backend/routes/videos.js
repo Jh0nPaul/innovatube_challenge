@@ -1,42 +1,53 @@
+// routes/videos.js
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const auth = require('../middleware/auth'); // El middleware de seguridad
+const auth = require('../middleware/auth');
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search';
 
-// --- GET /api/videos/search?q=query ---
 router.get('/search', auth, async (req, res) => {
-    const { q } = req.query; 
+  try {
+    const q = String(req.query.q || '').trim();
+    if (!q) return res.status(400).json({ msg: 'El parámetro de búsqueda "q" es obligatorio.' });
 
-    if (!q) {
-        return res.status(400).json({ msg: 'El parámetro de búsqueda "q" es obligatorio.' });
+    if (!YOUTUBE_API_KEY) {
+      return res.status(500).json({ msg: 'YOUTUBE_API_KEY no está configurada en el backend.' });
     }
 
-    try {
-        const response = await axios.get(YOUTUBE_API_URL, {
-            params: {
-                part: 'snippet',
-                q: q,
-                key: YOUTUBE_API_KEY, 
-                type: 'video',
-                maxResults: 10 
-            }
-        });
+    const { data } = await axios.get(YOUTUBE_API_URL, {
+      params: {
+        part: 'snippet',
+        q,
+        key: YOUTUBE_API_KEY,
+        type: 'video',
+        maxResults: 10,
+        safeSearch: 'moderate',
+        regionCode: 'MX',
+      },
+      timeout: 10000,
+    });
 
-        const videos = response.data.items.map(item => ({
-            videoId: item.id.videoId,
-            title: item.snippet.title,
-            thumbnailUrl: item.snippet.thumbnails.medium.url,
-            channelTitle: item.snippet.channelTitle
-        }));
+    const items = Array.isArray(data?.items) ? data.items : [];
+    const videos = items.map((item) => ({
+      videoId: item?.id?.videoId,
+      title: item?.snippet?.title,
+      thumbnailUrl: item?.snippet?.thumbnails?.medium?.url || item?.snippet?.thumbnails?.default?.url,
+      channelTitle: item?.snippet?.channelTitle,
+    })).filter(v => !!v.videoId);
 
-        res.json(videos);
-    } catch (err) {
-        console.error('Error al llamar a la API de YouTube:', err.message);
-        res.status(500).json({ msg: 'Error al buscar videos en YouTube' });
-    }
+    return res.json(videos);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    const details = err?.response?.data || err.message;
+    console.error('YouTube error:', status, details);
+    return res.status(status === 403 || status === 400 ? status : 502).json({
+      msg: 'Error al consultar la API de YouTube',
+      status,
+      details,
+    });
+  }
 });
 
 module.exports = router;

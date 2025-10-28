@@ -3,24 +3,18 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
-
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [FormsModule, RouterModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
-  // Estado del formulario
-  user = {
-    email: '',
-    password: ''
-  };
+  user = { email: '', password: '' };
   isLoading = false;
   errorMessage: string | null = null;
 
-  // Inyección de dependencias (AuthService y Router)
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -35,18 +29,12 @@ export class LoginComponent {
     }
 
     this.authService.login(this.user.email, this.user.password).subscribe({
-      next: () => {
-        // Redirije a la página de búsqueda tras el login exitoso
-        this.router.navigate(['/search']);
-      },
+      next: () => this.router.navigate(['/search']),
       error: (err) => {
-        // Catching de errores
-        this.errorMessage = err.error?.msg || 'Error de conexión. Revisa las credenciales.';
+        this.errorMessage = err?.error?.msg || 'Error de conexión. Revisa las credenciales.';
         this.isLoading = false;
       },
-      complete: () => {
-        this.isLoading = false;
-      }
+      complete: () => (this.isLoading = false),
     });
   }
 }

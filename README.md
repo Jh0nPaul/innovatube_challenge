@@ -1,3 +1,6 @@
+    email: test123@test.com
+    password: 123456
+
 # innovatube_challenge
 [Angular & NodeJS] InnovaTube Challenge: YouTube search app with user authentication and a favorites list.
 
